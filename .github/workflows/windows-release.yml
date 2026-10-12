@@ -1,0 +1,85 @@
+name: Windows release assets
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Successful Windows workflow run ID
+        required: true
+        type: string
+      release_id:
+        description: Existing draft pre-release ID
+        required: true
+        type: string
+permissions:
+  actions: read
+  contents: write
+concurrency:
+  group: windows-release-${{ inputs.release_id }}
+  cancel-in-progress: false
+jobs:
+  upload:
+    if: github.repository == 'UncleK/CCBaga-Windows' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Verify successful build and upload existing bytes to draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.run_id }}
+          RELEASE_ID: ${{ inputs.release_id }}
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, re, subprocess, urllib.parse
+
+          repo = os.environ['GITHUB_REPOSITORY']
+          run_id, release_id = os.environ['RUN_ID'], os.environ['RELEASE_ID']
+          assert run_id.isdecimal() and release_id.isdecimal(), 'Numeric IDs required'
+          base = f'repos/{repo}'
+
+          def api(endpoint, *args):
+              return json.loads(subprocess.check_output(['gh', 'api', endpoint, *args]))
+
+          run = api(f'{base}/actions/runs/{run_id}')
+          assert run['conclusion'] == 'success' and run['status'] == 'completed'
+          assert run['path'] == '.github/workflows/windows.yml'
+          assert run['event'] in ('push', 'workflow_dispatch')
+          assert run['head_repository']['full_name'] == repo
+          assert run['head_branch'] in ('main', 'windows-port')
+          release = api(f'{base}/releases/{release_id}')
+          assert release['draft'] and release['prerelease'], 'Only draft previews may receive assets'
+          tag = re.fullmatch(r'v([0-9]+\.[0-9]+\.[0-9]+)-windows-preview\.([0-9]+)', release['tag_name'])
+          assert tag, 'Expected vX.Y.Z-windows-preview.N tag'
+          target = urllib.parse.quote(release['target_commitish'], safe='')
+          assert api(f'{base}/commits/{target}')['sha'] == run['head_sha'], 'Release target differs from tested commit'
+          print('Verified successful Windows build:', run['head_sha'])
+
+          subprocess.run(['gh', 'run', 'download', run_id, '--repo', repo,
+                          '--name', 'CCBaga-Windows-x64', '--dir', 'artifact'], check=True)
+          root = pathlib.Path('artifact')
+          files = list(root.glob('*.exe'))
+          assert len(files) == 1, 'Expected one installer'
+          installer = files[0]
+          checksum = (root / 'SHA256SUMS').read_text(encoding='utf-8-sig').strip()
+          digest = hashlib.sha256(installer.read_bytes()).hexdigest()
+          assert checksum == f'{digest}  {installer.name}', 'Installer checksum mismatch'
+          assert installer.read_bytes()[:2] == b'MZ', 'Expected a Windows executable'
+          name = f'CCBaga-Windows-{tag[1]}-preview.{tag[2]}-x64-setup.exe'
+          installer = installer.rename(root / name)
+          (root / 'SHA256SUMS').write_text(f'{digest}  {name}\n', encoding='utf-8')
+          upload_url = release['upload_url'].split('{', 1)[0]
+          assert upload_url == f'https://uploads.github.com/{base}/releases/{release_id}/assets'
+          existing = {asset['name']: asset for asset in release['assets']}
+
+          for file in (installer, root / 'SHA256SUMS'):
+              expected_digest = 'sha256:' + hashlib.sha256(file.read_bytes()).hexdigest()
+              if file.name in existing:
+                  asset = existing[file.name]
+              else:
+                  endpoint = upload_url + '?name=' + urllib.parse.quote(file.name, safe='')
+                  asset = api(endpoint, '--method', 'POST', '--header',
+                              'Content-Type: application/octet-stream', '--input', str(file))
+              assert asset['state'] == 'uploaded' and asset['size'] == file.stat().st_size
+              assert asset['digest'] == expected_digest, 'Uploaded bytes differ; no asset is overwritten'
+              print('Verified release asset:', file.name, expected_digest)
+          print('Draft assets ready. Review and publish the release on GitHub.')
+          PY
