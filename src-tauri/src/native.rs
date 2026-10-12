@@ -1,4 +1,4 @@
-// [INPUT]: macOS Objective-C / Linux Rust 的本地清理、授权与剪贴板接口。
+// [INPUT]: macOS Objective-C / Linux Rust / Windows PowerShell 与 Win32 的本地清理、授权与剪贴板接口。
 // [OUTPUT]: 辅助功能权限、剪贴板复制、钥匙串解锁、脱敏凭据发现与允许系统授权的直接删除。
 // [POS]: 清理与电脑设置的平台桥接边界；公共 JSON 解码供独立 system 桥复用。
 // [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
