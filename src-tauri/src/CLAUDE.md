@@ -20,3 +20,6 @@ regions.rs: 地区编号到语言、区域格式和代表时区的唯一白名�
 linux.rs: Linux procfs 当前用户进程、zoneinfo/timedatectl、GNOME 定位偏好、GNOME/KDE 设置入口与 Wayland/X11 剪贴板；LC_MESSAGES/LC_TIME 分别读取会话语言/区域格式，不匹配时先报手动操作再改时区；未知定位为 null，Linux 钥匙串明确不可用；不将系统代理凭据序列化给 WebView。
 network_links.rs: 固定供应商与 Skill 导航白名单，编译消费 Skill 的 providers.json 组装原始 URL，WebView 不能指定 URL；无密钥访问或 SSH 执行。
 [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+
+platform.rs: Unix/Windows 共用文件边界；Windows reparse/junction、稳定文件标识、当前用户所有权、私有临时文件和原子替换。
+windows/: PowerShell JSON 数据桥、Win32 文件 API、系统设置、当前用户进程身份、官方 npm CLI 管理和 Windows 临时样本测试；见 windows/CLAUDE.md。

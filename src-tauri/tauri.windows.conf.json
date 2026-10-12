@@ -14,7 +14,10 @@
     ],
     "createUpdaterArtifacts": false,
     "resources": {
-      "../browser-runtime/windows/": "browser-runtime/windows/"
+      "../browser-runtime/windows/": "browser-runtime/windows/",
+      "../docs/LICENSE.unicode": "licenses/LICENSE.unicode",
+      "../LICENSE": "licenses/LICENSE.CCBaga",
+      "../NOTICE.md": "licenses/NOTICE.md"
     },
     "windows": {
       "webviewInstallMode": {

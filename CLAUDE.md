@@ -36,3 +36,13 @@ CLI 管理：Claude 清理页提供一键卸载/重装，确认后结束全部�
 安全契约：src-tauri/SECURITY.md 描述数据流与外部连接；进程参数只在原生层识别，Machine.system_proxy 禁止序列化；宿主无用户信息上传服务；验证未覆盖的第三方、桌面或远程行为不得宣称通过。
 Linux x86_64 适配：见 docs/linux.md；平台配置拆分为 tauri.macos.conf.json / tauri.linux.conf.json。Linux 原生边界位于 src-tauri/src/linux.rs，浏览器使用带哈希固定的 LinuxBrowser 与 XDG 启动项；版本任务后并行构建 macOS/Ubuntu/Arch；DEB/RPM/AppImage 引擎隔离在 libexec，避免宿主打包工具改写；Linux 实际安装包均解包核验，四格式与 macOS 同批验收后由所有者统一发布，Linux 不接触 Apple/更新私钥。
 [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+
+## Community Windows fork
+
+本仓库为 UncleK/CCBaga-Windows。Windows 10/11 x64 社区移植由本仓库所有者发布；上述 liseami、Apple 签名、公证、双 DMG 和 main/release 原子推送规则仅属于上游 macOS/Linux 官方发行，不用于本仓库 Windows 交付。保留上游历史与许可证，不推送上游。
+
+README.md / README.en.md 是中英项目入口；README.windows.md / README.windows.en.md 为对等 Windows 使用与构建指南。变更须同步双语说明，并按实际证据区分编译、临时样本测试和真实桌面验收。分阶段提交远端保存，不能只依赖临时工作区。
+
+Windows 使用 src-tauri/src/windows/ 与 platform.rs、PowerShell 5.1 JSON 标准输入、Win32 文件身份/ACL、独立 Windows Chromium 和当前用户 NSIS。禁用 macOS updater；不自动删除 Windows 凭据、不宣称默认浏览器注册或 Store/WinGet 支持。清理保留 MCP/skills/项目，只匹配当前用户且重新核验身份；未知权限、junction 或状态导致拒绝/未知，不可降级为成功。
+
+验证入口为 bun run windows:test 与 .github/workflows/windows.yml。测试必须只操作临时样本，禁止修改运行机器的真实 Claude 数据或系统设置。

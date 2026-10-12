@@ -37,7 +37,7 @@ pub async fn claude_cli_manage(
     state.enter()?;
     let result = tauri::async_runtime::spawn_blocking(move || {
         let log = Reporter::channel(Some(on_progress));
-        let result = (|| {
+        let result: Result<CliStatus, String> = (|| {
             if crate::cleaner::cli_running()? {
                 return Err("Claude Code 仍在运行，请先结束进程。".into());
             }

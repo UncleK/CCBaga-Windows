@@ -8,3 +8,5 @@ server.rs: 随机令牌回环服务，刷新实际机器与界面语言上下文
 tests.rs: 模块共用临时目录样本，验证代理/资料边界、缓存隔离与地区核验；本机 HTTP 样本复现 429 并核验备援解析，不触碰现有账号数据。
 linux.rs: Linux libexec 隔离引擎（兼容源码/Arch 的资源目录），带双布局路径回归，与宿主驱动的 CCBaga-B 启动项；处理 --browser 链接、同资料重连、显式 xdg-mime 注册并核验 HTTP/HTTPS；定位状态未知的桌面禁止完整机器对齐，修改前停止；Linux UA 不提供内核版本，不用 UA 值伪装内核核验。
 [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+
+windows.rs: Windows chrome.exe 资源定位、实际 PE 产品版本读取、宿主启动的独立浏览器；默认应用只打开 Windows 设置，不虚报注册。profile 路径验证跳过裸磁盘 prefix 后检查全部祖先 reparse point；共享系统匹配识别 Windows 平台及 CLDR 时区别名。

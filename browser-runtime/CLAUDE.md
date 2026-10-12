@@ -9,3 +9,5 @@ entitlements.plist: 只向 Renderer/GPU Helper 开放 MAP_JIT，对齐 Chromium 
 version.txt: 从实际 Info.plist 生成的引擎版本。
 LinuxBrowser/: 固定上游 tar.xz，经 SHA-256、ELF x86_64 与实际版本核验；被 Git 忽略；系统安装包走 libexec，源码/Arch 由 package-browser.sh 准备构建资源树。ccbaga-browser.desktop: Linux 包的 B 启动项，通过 requirement-french --browser 启动宿主和同一独立资料，不修改默认浏览器。
 [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+
+Windows 引擎由 scripts/fetch-browser-windows.py 下载并验证到 windows/，整个目录不进入 Git。随 NSIS 保留全部引擎资源和许可；不与 Mac/Linux 引擎路径混用。

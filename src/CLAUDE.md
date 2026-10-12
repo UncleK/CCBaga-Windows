@@ -28,3 +28,5 @@ network-skill.ts: 五项工具安装目录与运行入口，通用项由当前�
 network-skill.test.ts: 五项工具顺序、目录/调用符与完整双语复制内容回归，拒绝混入网络流程描述。
 Linux 呈现边界：设备平台由原生快照提供；未知定位不显示关闭；系统授权提示不固定 macOS；更新入口在 Linux 明确要求通过包或源码更新，不请求现有 macOS-only 更新源。
 [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+
+Windows 界面：platform-model.ts 共享 CLDR 时区别名、语言脚本匹配和真实平台判断；同名测试防止误判。cleaner-model 支持 Windows 分隔符、大小写及 verbatim 路径，Unix 保留大小写。定位、凭据和默认应用入口明确手动处理；Windows/Linux 不请求 macOS updater。新增动作及原生错误同步 zh/en YAML。

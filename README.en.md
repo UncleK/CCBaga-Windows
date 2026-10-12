@@ -4,7 +4,7 @@
 
 A native Windows 10/11 x64 port of [liseami/CCBaga](https://github.com/liseami/CCBaga), built with Rust, Tauri and React, without WSL.
 
-> **Status: experimental development; Windows acceptance is incomplete.** Windows sources are being restored and synchronized. No validated Windows installer is available yet. The upstream macOS/Linux packages are not Windows releases.
+> **Status: experimental development; Windows acceptance is incomplete.** Windows port sources, launch scripts and the NSIS workflow are included. Refer to Windows Actions for native validation results. The upstream macOS/Linux packages are not Windows releases.
 
 ## Port scope
 
@@ -18,7 +18,15 @@ Credential Manager, Microsoft Store sandbox data, native/WinGet CLI maintenance,
 
 ## Build and validation
 
-Source builds require Windows 10/11 x64, Visual Studio 2022 C++ Build Tools, Rust MSVC, Node.js, Bun and Python 3.11+. Windows build instructions will be committed with the port.
+Source builds require Windows 10/11 x64, Visual Studio 2022 C++ Build Tools, Rust MSVC, Node.js, Bun and Python 3.11+. See [Windows setup and build](README.windows.en.md) ([简体中文](README.windows.md)).
+
+```powershell
+git clone https://github.com/UncleK/CCBaga-Windows.git
+cd CCBaga-Windows
+.\Start-Windows.cmd
+```
+
+Run `Build-Windows.cmd` to create an installer. Automated builds and installer artifacts are available in [Windows Actions](https://github.com/UncleK/CCBaga-Windows/actions/workflows/windows.yml).
 
 Refer to actual Windows Actions results. Compilation does not establish real desktop compatibility: installation, startup, permissions and browser connectivity require separate validation.
 

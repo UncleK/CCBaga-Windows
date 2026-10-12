@@ -594,5 +594,7 @@
     "Tonga Standard Time": "Pacific/Tongatapu",
     "Samoa Standard Time": "Pacific/Apia",
     "Line Islands Standard Time": "Pacific/Kiritimati"
-  }
+  },
+  "source_blob_sha": "2dc8c386cb3aed1a8c21b4ba7bb7b8d4f3535507",
+  "source_url": "https://github.com/unicode-org/cldr/blob/main/common/supplemental/windowsZones.xml"
 }

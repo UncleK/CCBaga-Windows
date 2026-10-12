@@ -4,3 +4,5 @@
 icon.png: 512 像素 RGBA 应用图标，CCBaga-A 橙底奶白清理员圆角方形；由 scripts/make-icons.sh 生成。
 icon.icns: macOS 应用包图标，16–1024 全尺寸 iconset 生成。
 [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+
+icon.ico: 从现有 icon.png 生成的 Windows 多分辨率图标，供 NSIS/宿主使用。

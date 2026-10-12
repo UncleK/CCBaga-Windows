@@ -41,3 +41,11 @@
 ## 验证边界
 
 前端、原生、安装边界与独立 Skill 使用可重复的离线回归；公开更新向量另需实际清单与签名归档。Skill 回归使用临时生成密钥和伪配置，不使用用户凭据，不连接 VPS。配置非交互验证、拒绝 Git/Skill 写入与覆盖、秘密标准输入传输、完整目标链接、配对/权限/清理与失败/超时均有可运行回归。各平台构建运行 Skill 与原生验收，Linux 安装包按真实引擎字节检查后才交付。真实 VPS、家宽账号、TUN、桌面权限和第三方浏览器行为须在目标环境验证；未执行的操作不记为通过。视觉验收由项目所有者完成。
+
+## Windows community port
+
+Windows system integration uses fixed PowerShell scripts encoded as UTF-16 with separately serialized JSON stdin. User strings are not interpolated into script text. Timeouts terminate the spawned command tree. Process termination rechecks current-user SID, executable and creation time; uncertain inspection fails closed.
+
+Files are checked for reparse points, current-user ownership, volume/file identity and snapshot changes. Replacement files receive a protected current-user DACL before content is written and use Win32 atomic replacement. Cleanup is limited to allowlisted data within the user profile or an explicitly selected folder. Custom/Store paths and Credential Manager entries are not silently included.
+
+The Windows host does not install the upstream macOS updater. Location and default-app choices remain user actions in Windows Settings; unknown states are never reported as successful. Public system snapshots strip proxy configuration, and Machine serialization also excludes it. Binary builds include a pinned, SHA-256 verified Windows browser. Desktop acceptance is separate from CI compilation and disposable-fixture tests.

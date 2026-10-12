@@ -8,12 +8,18 @@ impl Fixture {
             crate::browser::server::nonce().unwrap()
         ));
         fs::create_dir(&p).unwrap();
+        crate::windows::files::restrict(&p).unwrap();
         Self(fs::canonicalize(p).unwrap())
     }
     fn file(&self, name: &str, text: &str) -> PathBuf {
         let p = self.0.join(name);
         fs::create_dir_all(p.parent().unwrap()).unwrap();
         fs::write(&p, text).unwrap();
+        // CI may use an elevated token whose default owner is Administrators.
+        // Fixtures explicitly model ordinary current-user data ownership.
+        for path in p.ancestors().take_while(|path| path.starts_with(&self.0)) {
+            crate::windows::files::restrict(path).unwrap();
+        }
         p
     }
 }
@@ -78,6 +84,7 @@ fn junction_not_followed() {
     let outside = Fixture::new();
     outside.file("keep", "keep");
     fs::create_dir(f.0.join(".claude")).unwrap();
+    crate::windows::files::restrict(&f.0.join(".claude")).unwrap();
     let link = f.0.join(".claude/cache");
     // mklink's parser does not accept the Win32 verbatim prefix.
     let normal = |p: &Path| p.to_string_lossy().trim_start_matches(r"\\?\").to_string();

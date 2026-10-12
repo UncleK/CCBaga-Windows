@@ -208,7 +208,7 @@ pub fn checks(
         check(
             "目标语言与系统区域",
             target.zip(report).map(|(target, r)| {
-                r.language == target.language
+                crate::regions::same_language(&r.language, target.language)
                     && machine
                         .languages
                         .first()

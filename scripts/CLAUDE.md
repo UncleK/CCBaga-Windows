@@ -25,3 +25,8 @@ release-linux.py: 无 Apple/更新凭据的 x86_64 三格式构建，先运行 S
 test-rpm.py: 临时 DEB 文件树经真实 rpmbuild 转换，回归 RPM 版本/架构、桌面入口与引擎字节，不执行样本程序。
 verify-linux-package.py: Linux 安装包只读载荷契约，供 Ubuntu/Arch 共用，拒绝缺失 UI、入口或被改写的引擎文件/链接。
 build-arch.sh: 固定摘要容器准备 Node.js 等构建/测试依赖，以非 root makepkg、原生回归与解包验收，公开源码与 Cargo 缓存挂载；不接触 macOS 凭据。
+
+windows.ps1: Windows x64 依赖检查、Prepare/Dev/Build/Test 统一入口；错误码传播，不改变系统执行策略。
+claude-cli-windows.ps1: JSON 固定动作、已验证官方 npm 全局 CLI 的读取/卸载/重装；自定义、原生、WinGet 安装拒绝自动修改；配置资产保留。
+fetch-browser-windows.py: 固定 SHA-256 的 Windows x64 引擎，先校验 ZIP 摘要和路径，再检查 PE 与资源；支持同摘要离线输入。
+test_windows_browser.py: 仅临时 ZIP 样本验证路径、Unicode 与 Windows 打包配置。

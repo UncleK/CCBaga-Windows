@@ -85,3 +85,23 @@ pub fn run<T: DeserializeOwned>(
     }
     serde_json::from_slice(&output).map_err(|_| "Windows 返回数据不完整。".into())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn json_input_preserves_unicode_and_shell_characters() {
+        let input = serde_json::json!({"text":"中文 用户 $value; 'quoted' \"double\"\nnext line","path":r"C:\用户 空间\profile"});
+        let output: serde_json::Value = run(
+            "$data=[Console]::In.ReadToEnd() | ConvertFrom-Json; $data | ConvertTo-Json -Compress",
+            &input,
+            15,
+        )
+        .unwrap();
+        assert_eq!(output, input);
+    }
+    #[test]
+    fn failed_command_is_not_a_successful_json_response() {
+        assert!(run::<bool>("$true | ConvertTo-Json; exit 7", &(), 15).is_err());
+    }
+}

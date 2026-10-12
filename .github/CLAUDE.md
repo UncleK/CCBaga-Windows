@@ -3,3 +3,5 @@
 workflows/ - release 分支 push 的签名公证与双应用发布；见其 CLAUDE.md。
 dependabot.yml: 每周跟进 Actions 的固定提交与依赖更新，更新通过 PR 审阅。
 [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
+
+workflows/windows.yml: 本社区仓库的 Windows 2022 构建、PowerShell 5.1 语法、前端/Python/原生临时样本回归、NSIS 与 SHA256SUMS 产物；不需要 Apple 或更新签名私钥。

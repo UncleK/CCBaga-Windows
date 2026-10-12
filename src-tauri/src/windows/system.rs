@@ -10,6 +10,9 @@ pub fn same_zone(a: &str, b: &str) -> bool {
     a == b || (zones()["iana"][a].is_string() && zones()["iana"][a] == zones()["iana"][b])
 }
 pub fn same_language(a: &str, b: &str) -> bool {
+    if a.is_empty() || b.is_empty() {
+        return false;
+    }
     fn normalized(s: &str) -> String {
         match s {
             "zh-CN" | "zh-SG" => "zh-Hans".into(),

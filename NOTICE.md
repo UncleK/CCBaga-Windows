@@ -32,4 +32,6 @@ Claude cleanup discovery was informed by the [claude-cleanup skill](https://gith
 
 The cleaner and browser artwork was supplied for use with this project. Anthropic, Claude, Apple, Chromium and other third-party names remain the property of their respective owners. Their mention does not imply sponsorship or endorsement.
 
-Windows timezone mapping: Unicode CLDR windowsZones.xml, Unicode License v3. See docs/LICENSE.unicode.
+## Windows timezone mapping
+
+`src-tauri/src/windows/timezones.json` derives from Unicode CLDR `common/supplemental/windowsZones.xml`, source blob SHA `2dc8c386cb3aed1a8c21b4ba7bb7b8d4f3535507`, with explicit modern IANA aliases. Copyright Unicode, Inc.; Unicode License v3 is retained in [docs/LICENSE.unicode](docs/LICENSE.unicode). The app uses the same mapping for native settings and browser comparison.

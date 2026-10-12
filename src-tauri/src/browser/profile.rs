@@ -49,6 +49,9 @@ pub fn check_path(root: &Path, path: &Path) -> Result<(), String> {
     let mut current = PathBuf::new();
     for component in path.components() {
         current.push(component);
+        if matches!(component, std::path::Component::Prefix(_)) {
+            continue;
+        }
         match fs::symlink_metadata(&current) {
             Ok(meta) if crate::platform::is_link(&meta) => {
                 return Err("检测到链接，未修改资料。".into())

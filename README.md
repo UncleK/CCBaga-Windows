@@ -4,7 +4,7 @@
 
 基于 [liseami/CCBaga](https://github.com/liseami/CCBaga) 的 Windows 10/11 x64 原生移植，使用 Rust、Tauri 和 React，无需 WSL。
 
-> **状态：实验性开发，尚未完成 Windows 验收。** Windows 源码正在恢复和同步；目前没有经过验证的 Windows 安装包。上游 macOS/Linux 安装包不能用于 Windows。
+> **状态：实验性开发，尚未完成 Windows 验收。** Windows 移植源码、启动脚本和 NSIS 构建工作流已加入；原生验证结果以 Windows Actions 为准。上游 macOS/Linux 安装包不能用于 Windows。
 
 ## 适配范围
 
@@ -18,7 +18,15 @@
 
 ## 构建与验证
 
-源码构建需要 Windows 10/11 x64、Visual Studio 2022 C++ Build Tools、Rust MSVC、Node.js、Bun 和 Python 3.11+。Windows 构建说明会随移植代码提交。
+源码构建需要 Windows 10/11 x64、Visual Studio 2022 C++ Build Tools、Rust MSVC、Node.js、Bun 和 Python 3.11+。详见 [Windows 使用与构建](README.windows.md)（[English](README.windows.en.md)）。
+
+```powershell
+git clone https://github.com/UncleK/CCBaga-Windows.git
+cd CCBaga-Windows
+.\Start-Windows.cmd
+```
+
+构建安装包运行 `Build-Windows.cmd`。自动构建与安装包产物见 [Windows Actions](https://github.com/UncleK/CCBaga-Windows/actions/workflows/windows.yml)。
 
 请以本仓库 Windows Actions 的实际结果为准。编译通过不等于真实电脑运行通过；安装、启动、系统授权与浏览器联网均需分别验证。
 
