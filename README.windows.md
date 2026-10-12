@@ -6,7 +6,16 @@
 
 ## 获取安装包
 
-打开本仓库 **Actions → Windows**，选择绿色成功的构建，在 **Artifacts** 下载 `CCBaga-Windows-x64`。解压后包含 NSIS `.exe` 安装包与 `SHA256SUMS`；下载 Actions 产物需要登录 GitHub，产物保留 30 天。如果没有成功构建或产物已过期，请使用下面的源码构建方式。
+打开 [Windows 预览版发布页](https://github.com/UncleK/CCBaga-Windows/releases/tag/v0.3.0-windows-preview.1)，在 **Assets** 下载 `CCBaga-Windows-0.3.0-preview.1-x64-setup.exe` 和 `SHA256SUMS`。在下载目录打开 PowerShell，对比以下命令显示的摘要与校验文件中的值：
+
+```powershell
+Get-FileHash .\CCBaga-Windows-0.3.0-preview.1-x64-setup.exe -Algorithm SHA256
+Get-Content .\SHA256SUMS
+```
+
+摘要一致后运行 `.exe`。直接安装无需 Rust、Node.js 或其他开发工具。预览版已在 Windows Server 2022 CI 完成测试和安装/启动检查，Windows 10/11 人工桌面验收仍未完成。
+
+开发构建也可在 **Actions → Windows → 成功的构建 → Artifacts** 下载 `CCBaga-Windows-x64`。Actions ZIP 包含安装包与校验文件，需要登录 GitHub，保留 30 天；公开预览版安装包请优先使用上面的发布页。
 
 安装包按当前用户安装，并包含独立 Chromium 引擎。缺少 Microsoft Edge WebView2 Runtime 时，安装程序会下载官方引导程序，因此首次安装可能需要联网。安装包暂未配置代码签名证书。不要关闭 Windows 安全保护来绕过安装问题。
 

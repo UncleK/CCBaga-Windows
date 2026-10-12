@@ -4,7 +4,11 @@
 
 A native Windows 10/11 x64 port of [liseami/CCBaga](https://github.com/liseami/CCBaga), built with Rust, Tauri and React, without WSL.
 
-> **Status: experimental Windows release.** Native Windows CI tests and NSIS packaging have passed; manual Windows 10/11 desktop acceptance remains incomplete. The upstream macOS/Linux packages are not Windows releases.
+> **Status: experimental Windows preview.** Windows Server 2022 CI passed 39 tests, NSIS packaging and installation/startup checks. Manual Windows 10/11 desktop acceptance remains incomplete. The upstream macOS/Linux packages are not Windows releases.
+
+## Download and install
+
+[Download Windows x64 preview v0.3.0-preview.1](https://github.com/UncleK/CCBaga-Windows/releases/tag/v0.3.0-windows-preview.1). Under **Assets**, download `CCBaga-Windows-0.3.0-preview.1-x64-setup.exe` and `SHA256SUMS`, verify the checksum and run the installer. No development tools are needed to install it. See the [Windows guide](README.windows.en.md) for installation, verification and usage.
 
 ## Port scope
 
@@ -28,7 +32,7 @@ cd CCBaga-Windows
 
 Run `Build-Windows.cmd` to create an installer. Automated builds and installer artifacts are available in [Windows Actions](https://github.com/UncleK/CCBaga-Windows/actions/workflows/windows.yml).
 
-Refer to actual Windows Actions results. Compilation does not establish real desktop compatibility: installation, startup, permissions and browser connectivity require separate validation.
+[Preview validation record](https://github.com/UncleK/CCBaga-Windows/actions/runs/38211799505): 16 frontend tests, 3 acquisition/packaging safety tests, 20 native tests, plus installation, engine integrity, host startup and companion browser startup checks. CI does not replace manual Windows 10/11 desktop, system permission and real network acceptance.
 
 ## Data boundaries
 

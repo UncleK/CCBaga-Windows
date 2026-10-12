@@ -6,7 +6,16 @@ For **Windows 10/11 x64**. This independent community port remains experimental.
 
 ## Get an installer
 
-Open this repository's **Actions → Windows**, select a successful green run, and download `CCBaga-Windows-x64` under **Artifacts**. The ZIP contains an NSIS `.exe` installer and `SHA256SUMS`. Actions artifact downloads require a GitHub login; artifacts are retained for 30 days. If there is no successful run or its artifact has expired, build from source below.
+Open the [Windows preview release](https://github.com/UncleK/CCBaga-Windows/releases/tag/v0.3.0-windows-preview.1) and download `CCBaga-Windows-0.3.0-preview.1-x64-setup.exe` and `SHA256SUMS` under **Assets**. Open PowerShell in your download directory and compare the calculated digest with the value in the checksum file:
+
+```powershell
+Get-FileHash .\CCBaga-Windows-0.3.0-preview.1-x64-setup.exe -Algorithm SHA256
+Get-Content .\SHA256SUMS
+```
+
+Run the `.exe` after the digests match. Installation does not require Rust, Node.js or other development tools. The preview passed tests and installation/startup checks on Windows Server 2022 CI; manual Windows 10/11 desktop acceptance remains incomplete.
+
+Development builds are also available under **Actions → Windows → a successful run → Artifacts → CCBaga-Windows-x64**. These ZIPs contain the installer and checksums, require a GitHub login and expire after 30 days. Prefer the release page above for the public preview installer.
 
 The installer is per-user and includes the dedicated Chromium engine. If Microsoft Edge WebView2 Runtime is missing, it downloads Microsoft's bootstrapper, so initial installation may require internet access. Code signing is not configured yet. Do not disable Windows security protections to work around installation problems.
 

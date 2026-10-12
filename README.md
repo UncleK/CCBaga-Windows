@@ -4,7 +4,11 @@
 
 基于 [liseami/CCBaga](https://github.com/liseami/CCBaga) 的 Windows 10/11 x64 原生移植，使用 Rust、Tauri 和 React，无需 WSL。
 
-> **状态：实验性 Windows 版本。** 已通过 Windows CI 原生测试与 NSIS 安装包构建；Windows 10/11 人工桌面验收尚未完成。上游 macOS/Linux 安装包不能用于 Windows。
+> **状态：实验性 Windows 预览版。** 已通过 Windows Server 2022 CI 的 39 项测试、NSIS 构建和安装/启动检查；Windows 10/11 人工桌面验收尚未完成。上游 macOS/Linux 安装包不能用于 Windows。
+
+## 下载与安装
+
+[下载 Windows x64 预览版 v0.3.0-preview.1](https://github.com/UncleK/CCBaga-Windows/releases/tag/v0.3.0-windows-preview.1)。在发布页 **Assets** 下载 `CCBaga-Windows-0.3.0-preview.1-x64-setup.exe` 和 `SHA256SUMS`，核验后运行安装包；直接安装不需要开发工具。安装、校验和使用说明见 [Windows 指南](README.windows.md)。
 
 ## 适配范围
 
@@ -28,7 +32,7 @@ cd CCBaga-Windows
 
 构建安装包运行 `Build-Windows.cmd`。自动构建与安装包产物见 [Windows Actions](https://github.com/UncleK/CCBaga-Windows/actions/workflows/windows.yml)。
 
-请以本仓库 Windows Actions 的实际结果为准。编译通过不等于真实电脑运行通过；安装、启动、系统授权与浏览器联网均需分别验证。
+[预览版验证记录](https://github.com/UncleK/CCBaga-Windows/actions/runs/38211799505)：16 项前端、3 项下载/打包安全、20 项原生测试，以及安装、引擎完整性、宿主与专用浏览器启动检查。CI 验证不能替代 Windows 10/11 人工桌面、系统授权与实际网络环境验收。
 
 ## 数据边界
 

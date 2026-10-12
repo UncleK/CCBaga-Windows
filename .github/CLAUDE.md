@@ -5,3 +5,4 @@ dependabot.yml: 每周跟进 Actions 的固定提交与依赖更新，更新通�
 [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 
 workflows/windows.yml: 本社区仓库的 Windows 2022 构建、PowerShell 5.1 语法、前端/Python/原生临时样本回归、NSIS 与 SHA256SUMS 产物；不需要 Apple 或更新签名私钥。
+workflows/windows-release.yml: 手动将成功构建的原有安装包传入预发布草稿；核验来源、目标提交和附件摘要，不覆盖或自动发布。

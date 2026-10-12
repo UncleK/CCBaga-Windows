@@ -15,6 +15,10 @@ Follow the [Windows build guide](README.windows.en.md). Use the existing lockfil
 
 Windows builds are published by this fork's maintainer. Official upstream releases remain under **liseami/CCBaga** and are separate from this community port.
 
+## Publishing a preview
+
+After a successful **Windows** CI run, create a draft pre-release with a `vX.Y.Z-windows-preview.N` tag and a target pointing to that tested commit. Run **Windows release assets** from `main`, supplying the build run ID and draft release ID. The workflow verifies the build, target and installer checksum, uploads the existing installer bytes and checks GitHub's asset digests. It does not overwrite different assets or publish the draft. Review the uploaded assets and bilingual notes, publish the release, then update both languages' download links.
+
 ## Bug reports
 
 Include Windows version, app version, reproduction steps, expected behavior and sanitized errors. Never attach private keys, tokens, passwords, authenticated subscription URLs or personal file contents. Send sensitive security details privately to the repository owner.
