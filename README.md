@@ -4,7 +4,7 @@
 
 基于 [liseami/CCBaga](https://github.com/liseami/CCBaga) 的 Windows 10/11 x64 原生移植，使用 Rust、Tauri 和 React，无需 WSL。
 
-> **状态：实验性开发，尚未完成 Windows 验收。** Windows 移植源码、启动脚本和 NSIS 构建工作流已加入；原生验证结果以 Windows Actions 为准。上游 macOS/Linux 安装包不能用于 Windows。
+> **状态：实验性 Windows 版本。** 已通过 Windows CI 原生测试与 NSIS 安装包构建；Windows 10/11 人工桌面验收尚未完成。上游 macOS/Linux 安装包不能用于 Windows。
 
 ## 适配范围
 
@@ -35,6 +35,10 @@ cd CCBaga-Windows
 **确认清理后直接删除，不经过回收站，不自动备份，也无法撤回。** 清理应保留项目源码、skills、plugins 和 MCP 配置。专用浏览器不使用日常 Chrome/Edge 资料目录。
 
 环境检测会实际访问 `ipwho.is`，失败时经同一路由使用 `ipapi.co`。检测通过只说明已测项目一致，不保证匿名性或账号可用性；DNS/WebRTC 不宣称已经独立核验。
+
+## 参与项目
+
+构建和反馈问题请阅读 [贡献指南](CONTRIBUTING.zh-CN.md)。
 
 ## 来源与许可
 

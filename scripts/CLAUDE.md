@@ -30,3 +30,5 @@ windows.ps1: Windows x64 依赖检查、Prepare/Dev/Build/Test 统一入口；�
 claude-cli-windows.ps1: JSON 固定动作、已验证官方 npm 全局 CLI 的读取/卸载/重装；自定义、原生、WinGet 安装拒绝自动修改；配置资产保留。
 fetch-browser-windows.py: 固定 SHA-256 的 Windows x64 引擎，先校验 ZIP 摘要和路径，再检查 PE 与资源；支持同摘要离线输入。
 test_windows_browser.py: 仅临时 ZIP 样本验证路径、Unicode 与 Windows 打包配置。
+
+smoke-windows.ps1: 仅一次性 GitHub Windows runner，验证 NSIS 当前用户安装、资源及引擎摘要、宿主启动、回环页面和真实 Windows 上下文；不修改系统设置或真实用户数据。

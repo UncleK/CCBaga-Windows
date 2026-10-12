@@ -46,3 +46,5 @@ README.md / README.en.md 是中英项目入口；README.windows.md / README.wind
 Windows 使用 src-tauri/src/windows/ 与 platform.rs、PowerShell 5.1 JSON 标准输入、Win32 文件身份/ACL、独立 Windows Chromium 和当前用户 NSIS。禁用 macOS updater；不自动删除 Windows 凭据、不宣称默认浏览器注册或 Store/WinGet 支持。清理保留 MCP/skills/项目，只匹配当前用户且重新核验身份；未知权限、junction 或状态导致拒绝/未知，不可降级为成功。
 
 验证入口为 bun run windows:test 与 .github/workflows/windows.yml。测试必须只操作临时样本，禁止修改运行机器的真实 Claude 数据或系统设置。
+
+CONTRIBUTING.md / CONTRIBUTING.zh-CN.md：中英贡献与脱敏反馈指南，使用本仓库 Windows 构建入口；安装后 smoke 检查仅在一次性 GitHub runner 执行。

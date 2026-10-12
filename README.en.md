@@ -4,7 +4,7 @@
 
 A native Windows 10/11 x64 port of [liseami/CCBaga](https://github.com/liseami/CCBaga), built with Rust, Tauri and React, without WSL.
 
-> **Status: experimental development; Windows acceptance is incomplete.** Windows port sources, launch scripts and the NSIS workflow are included. Refer to Windows Actions for native validation results. The upstream macOS/Linux packages are not Windows releases.
+> **Status: experimental Windows release.** Native Windows CI tests and NSIS packaging have passed; manual Windows 10/11 desktop acceptance remains incomplete. The upstream macOS/Linux packages are not Windows releases.
 
 ## Port scope
 
@@ -35,6 +35,10 @@ Refer to actual Windows Actions results. Compilation does not establish real des
 **Confirmed cleanup deletes directly, bypassing the Recycle Bin, with no automatic backup or undo.** Project source, skills, plugins and MCP configuration should be preserved. The companion browser does not use everyday Chrome/Edge profiles.
 
 Environment checks make real requests to `ipwho.is`, with `ipapi.co` as a fallback on the same route. Passing means only that measured checks match; it does not guarantee anonymity or account acceptance. DNS/WebRTC leak checks are not independently verified.
+
+## Contributing
+
+See the [contribution guide](CONTRIBUTING.md) for builds and bug reports.
 
 ## Source and license
 
