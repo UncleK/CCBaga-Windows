@@ -6,7 +6,11 @@
 #[cfg(all(not(debug_assertions), not(feature = "custom-protocol")))]
 compile_error!("发布构建需要 custom-protocol；使用 tauri build 或 cargo build --release --features custom-protocol。");
 mod browser;
+#[cfg_attr(windows, path = "windows/claude_cli.rs")]
 mod claude_cli;
+mod platform;
+#[cfg(windows)]
+mod windows;
 mod cleaner;
 #[cfg(target_os = "linux")]
 mod linux;
@@ -54,8 +58,10 @@ fn runtime_platform() -> &'static str {
     std::env::consts::OS
 }
 fn main() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_updater::Builder::new().build())
+    let builder = tauri::Builder::default();
+    #[cfg(not(windows))]
+    let builder = builder.plugin(tauri_plugin_updater::Builder::new().build());
+    builder
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_single_instance::init(|app, args, _| {
             #[cfg(target_os = "linux")]
@@ -70,7 +76,7 @@ fn main() {
             app.manage(ui_language::UiLanguage::load(app.handle()));
             app.manage(cleaner::Cleaner::default());
             app.manage(browser::Browser::default());
-            #[cfg(target_os = "macos")]
+            #[cfg(any(target_os = "macos", windows))]
             browser::companion(app.handle().clone());
             #[cfg(target_os = "linux")]
             browser::open_urls(app.handle().clone(), std::env::args().collect());

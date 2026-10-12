@@ -275,6 +275,21 @@ pub(super) fn definitions(root: &Path) -> Vec<Target> {
         }
         // Linux Desktop packages are third-party; do not reset the whole config directory.
     }
+    #[cfg(windows)]
+    {
+        result.retain(|item|!item.path.starts_with(root.join("Library"))&&!matches!(item.operation,Operation::Edit(config::EditKind::Shell)));
+        let desktop = if super::home().ok().as_deref()==Some(root) {
+            std::env::var_os("APPDATA").and_then(|p|fs::canonicalize(p).ok()).filter(|p|p.starts_with(root)).map(|p|p.join("Claude"))
+        } else {Some(root.join("AppData/Roaming/Claude"))};
+        if let Some(desktop)=desktop {
+            for relative in ["Cache","Code Cache","GPUCache","DawnCache","logs","Service Worker/CacheStorage","Service Worker/ScriptCache"] {
+                result.push(target(&desktop,relative,"Claude Desktop 缓存","cache","safe","仅移除可重新生成的缓存。"));
+            }
+            for relative in ["Network/Cookies","Network/Cookies-journal","Cookies","Cookies-journal","Local Storage","Session Storage","IndexedDB","WebStorage"] {
+                result.push(target(&desktop,relative,"Claude Desktop 登录存储","account","login","删除后需要重新登录；保留 MCP 配置和扩展。"));
+            }
+        }
+    }
     result.sort_by(|a, b| a.path.cmp(&b.path));
     result.dedup_by(|a, b| a.path == b.path);
     result
@@ -311,21 +326,14 @@ pub(super) fn measure(path: &Path) -> (u64, usize, bool, Vec<u8>) {
         };
         hash.update(path.as_os_str().as_encoded_bytes());
         hash.update([0]);
-        for field in [
-            meta.dev(),
-            meta.ino(),
-            meta.mtime() as u64,
-            meta.mtime_nsec() as u64,
-            meta.ctime() as u64,
-            meta.ctime_nsec() as u64,
-            meta.len(),
-        ] {
+        let Ok(fields)=crate::platform::fingerprint(&path,&meta) else { return (bytes,files,false,hash.finalize().to_vec()); };
+        for field in fields {
             hash.update(field.to_le_bytes());
         }
         if meta.is_file() {
             bytes = bytes.saturating_add(meta.len());
             files += 1;
-        } else if meta.is_dir() && !meta.file_type().is_symlink() {
+        } else if meta.is_dir() && !crate::platform::is_link(&meta) {
             let Ok(entries) = fs::read_dir(&path) else {
                 return (bytes, files, false, hash.finalize().to_vec());
             };
@@ -362,11 +370,11 @@ pub(super) fn org_files(root: &Path, org: &str) -> Result<(Vec<PathBuf>, bool), 
         "Library/Application Support/Claude/local_sessions",
         "Library/Application Support/Claude/conversations",
     ] {
-        if cfg!(target_os = "linux") && relative.starts_with("Library/") {
+        if !cfg!(target_os = "macos") && relative.starts_with("Library/") {
             continue;
         }
         let p = root.join(relative);
-        if fs::canonicalize(&p).ok().as_deref() == Some(p.as_path()) {
+        if crate::platform::real_path(&p) {
             pending.push((p, 0));
         }
     }
@@ -381,7 +389,7 @@ pub(super) fn org_files(root: &Path, org: &str) -> Result<(Vec<PathBuf>, bool), 
             complete = false;
             continue;
         };
-        if meta.uid() != unsafe { getuid() } || meta.file_type().is_symlink() {
+        if !crate::platform::owned(&path,&meta) || crate::platform::is_link(&meta) {
             continue;
         }
         if meta.is_dir() {

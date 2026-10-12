@@ -7,7 +7,6 @@ use crate::progress::{Progress, Reporter};
 use serde::Serialize;
 use std::{
     fs,
-    os::unix::fs::{MetadataExt, PermissionsExt},
     path::{Path, PathBuf},
     sync::{
         atomic::{AtomicBool, Ordering},
@@ -25,11 +24,12 @@ mod folder;
 mod targets;
 #[path = "cleaner_transaction.rs"]
 mod transaction;
-#[cfg(test)]
+#[cfg(all(test, unix))]
 use transaction::perform_items;
-#[cfg(test)]
+#[cfg(all(test, unix))]
 #[path = "cleaner_tests.rs"]
 mod tests;
+#[cfg(unix)]
 extern "C" {
     fn getuid() -> u32;
     fn kill(pid: i32, signal: i32) -> i32;
@@ -62,25 +62,9 @@ pub struct Item {
     tree_stamp: Vec<u8>,
 }
 #[derive(Clone, PartialEq)]
-struct Stamp {
-    dev: u64,
-    inode: u64,
-    modified: i64,
-    nanos: i64,
-    changed: i64,
-    changed_nanos: i64,
-    size: u64,
-}
-fn stamp(m: &fs::Metadata) -> Stamp {
-    Stamp {
-        dev: m.dev(),
-        inode: m.ino(),
-        modified: m.mtime(),
-        nanos: m.mtime_nsec(),
-        changed: m.ctime(),
-        changed_nanos: m.ctime_nsec(),
-        size: m.len(),
-    }
+struct Stamp(Vec<u64>);
+fn stamp(path: &Path, meta: &fs::Metadata) -> Result<Stamp, String> {
+    crate::platform::fingerprint(path,meta).map(Stamp)
 }
 fn generation() -> u128 {
     std::time::SystemTime::now()
@@ -122,12 +106,7 @@ impl Cleaner {
         self.active.store(false, Ordering::SeqCst);
     }
 }
-fn home() -> Result<PathBuf, String> {
-    fs::canonicalize(PathBuf::from(
-        std::env::var_os("HOME").ok_or("无法定位用户目录。")?,
-    ))
-    .map_err(|_| "无法读取用户目录。".into())
-}
+fn home() -> Result<PathBuf, String> { crate::platform::home() }
 fn add_target(scan: &mut Scan, target: targets::Target, batch: u128) {
     let path = target.path;
     let meta = match fs::symlink_metadata(&path) {
@@ -139,10 +118,10 @@ fn add_target(scan: &mut Scan, target: targets::Target, batch: u128) {
             return;
         }
     };
-    if meta.file_type().is_symlink()
-        || meta.uid() != unsafe { getuid() }
+    if crate::platform::is_link(&meta)
+        || !crate::platform::owned(&path, &meta)
         || (!meta.is_dir() && !meta.is_file())
-        || fs::canonicalize(&path).ok().as_deref() != Some(path.as_path())
+        || !crate::platform::real_path(&path)
     {
         scan.warnings.push(format!(
             "已跳过链接、其他用户或特殊路径：{}",
@@ -181,6 +160,7 @@ fn add_target(scan: &mut Scan, target: targets::Target, batch: u128) {
             }
         }
     }
+    let item_stamp = match stamp(&path,&meta) { Ok(value)=>value, Err(error)=>{scan.warnings.push(error);return;} };
     let (bytes, files, exact, tree_stamp) = targets::measure(&path);
     scan.items.push(Item {
         id: format!("{batch}-{}", scan.items.len()),
@@ -195,7 +175,7 @@ fn add_target(scan: &mut Scan, target: targets::Target, batch: u128) {
         keys,
         operation: target.operation,
         directory: meta.is_dir(),
-        stamp: Some(stamp(&meta)),
+        stamp: Some(item_stamp),
         tree_stamp,
     });
 }
@@ -310,6 +290,7 @@ fn diagnostics(scan: &mut Scan) {
         },
         status: if enabled { "review" } else { "info" },
     });
+    #[cfg(not(windows))]
     let timezone = fs::read_link("/etc/localtime")
         .ok()
         .map(|p| {
@@ -320,6 +301,8 @@ fn diagnostics(scan: &mut Scan) {
                 .to_string()
         })
         .unwrap_or("未知".into());
+    #[cfg(windows)]
+    let timezone = crate::windows::system::public_read().ok().and_then(|v|v["timezone"].as_str().map(str::to_string)).unwrap_or_else(||"未知".into());
     scan.diagnostics.push(Diagnostic {
         title: "设备时区".into(),
         detail: format!("{timezone} · 可在电脑设置中修改。"),
@@ -338,7 +321,11 @@ pub struct ClaudeProcess {
     name: String,
     #[serde(skip)]
     executable: String,
+    #[cfg(windows)]
+    #[serde(skip)]
+    started: String,
 }
+#[cfg(unix)]
 fn process_row(line: &str, desktop: &[i32], uid: u32) -> Option<ClaudeProcess> {
     let mut fields = line.trim().splitn(2, char::is_whitespace);
     if fields.next()?.parse::<u32>().ok()? != uid {
@@ -425,6 +412,13 @@ fn processes() -> Result<Vec<ClaudeProcess>, String> {
         })
         .collect())
 }
+#[cfg(windows)]
+fn processes() -> Result<Vec<ClaudeProcess>,String> {
+    Ok(crate::windows::process::list()?.into_iter().filter_map(|p| {
+        let name=crate::windows::process::claude_kind(&p)?;
+        Some(ClaudeProcess{pid:p.pid,name:name.into(),executable:p.executable,started:p.started})
+    }).collect())
+}
 fn running() -> Result<bool, String> {
     Ok(!processes()?.is_empty())
 }
@@ -442,6 +436,7 @@ pub async fn cleaner_processes() -> Result<Vec<ClaudeProcess>, String> {
         .await
         .map_err(|_| "进程检查被中断。".to_string())?
 }
+#[cfg(unix)]
 fn signal_same_process(target: &ClaudeProcess, signal: i32) -> Result<(), String> {
     if processes()?
         .iter()
@@ -456,6 +451,11 @@ fn signal_same_process(target: &ClaudeProcess, signal: i32) -> Result<(), String
         }
     }
     Ok(())
+}
+
+#[cfg(windows)]
+fn signal_same_process(target:&ClaudeProcess,_signal:i32)->Result<(),String>{
+    crate::windows::process::stop(&crate::windows::process::Process{pid:target.pid,executable:target.executable.clone(),started:target.started.clone(),command_line:String::new()},true)
 }
 
 fn current_scan(root: &Path, org: Option<&str>) -> Result<Scan, String> {
@@ -645,14 +645,14 @@ fn identity(item: &Item, root: &Path) -> Result<(), String> {
     let in_scope = in_scope
         || (home().ok().as_deref() == Some(root)
             && targets::definitions(root).iter().any(|t| t.path == path));
-    if !in_scope || fs::canonicalize(path).ok().as_deref() != Some(path) {
+    if !in_scope || !crate::platform::real_path(path) {
         return Err("路径已变化或超出当前用户范围。".into());
     }
     let m = fs::symlink_metadata(path).map_err(|_| "项目已变化，请重新扫描。")?;
-    if m.file_type().is_symlink()
-        || m.uid() != unsafe { getuid() }
+    if crate::platform::is_link(&m)
+        || !crate::platform::owned(path, &m)
         || m.is_dir() != item.directory
-        || Some(stamp(&m)) != item.stamp
+        || Some(stamp(path, &m)?) != item.stamp
     {
         return Err("数据已变化，请退出 Claude 后重新扫描。".into());
     }
@@ -697,3 +697,7 @@ pub async fn cleaner_clean(
     state.active.store(false, Ordering::SeqCst);
     result
 }
+
+#[cfg(all(test,windows))]
+#[path="windows/cleaner_tests.rs"]
+mod windows_tests;

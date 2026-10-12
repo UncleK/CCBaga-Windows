@@ -18,6 +18,8 @@ tauri-plugin-single-instance = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 sha2 = "0.10"
+getrandom = "0.3"
+base64 = "0.22"
 reqwest = { version = "0.13", default-features = false, features = ["rustls", "json", "socks"] }
 tokio = { version = "1", features = ["sync"] }
 tauri-plugin-updater = "2"
@@ -31,3 +33,6 @@ opt-level = "s"
 lto = true
 codegen-units = 1
 strip = true
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Security", "Win32_Security_Authorization", "Win32_Storage_FileSystem", "Win32_System_Threading", "Win32_UI_Shell"] }

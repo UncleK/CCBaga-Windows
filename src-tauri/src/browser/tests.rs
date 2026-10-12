@@ -52,6 +52,7 @@ fn proxy_and_real_hardware() {
         .iter()
         .any(|x| x.contains("load-extension") || x.contains("disable-web-security")));
 }
+#[cfg(unix)]
 #[test]
 fn cache_isolation_and_direct_delete() {
     let root = sample();
@@ -80,6 +81,7 @@ fn cache_isolation_and_direct_delete() {
     assert_eq!(fs::read_dir(&root).unwrap().count(), 1);
     fs::remove_dir_all(root).unwrap();
 }
+#[cfg(unix)]
 #[test]
 fn reject_links_and_malformed_preferences() {
     let root = sample();

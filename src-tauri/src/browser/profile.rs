@@ -4,6 +4,8 @@
 // [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 #[cfg(target_os = "linux")]
 use crate::linux::*;
+#[cfg(windows)]
+use crate::windows::*;
 use crate::native::decode;
 use serde::Serialize;
 use serde_json::{json, Value};
@@ -12,7 +14,6 @@ use std::ffi::c_char;
 use std::{
     ffi::CString,
     fs,
-    os::unix::fs::PermissionsExt,
     path::{Path, PathBuf},
 };
 #[cfg(target_os = "macos")]
@@ -37,14 +38,14 @@ pub fn quit(profile: &Path) -> Result<(), String> {
     Err("浏览器仍在运行，请保存任务并关闭浏览器窗口。".into())
 }
 pub fn check_path(root: &Path, path: &Path) -> Result<(), String> {
-    if !path.starts_with(root) {
+    if !path.is_absolute() || !path.starts_with(root) || path.components().any(|c|matches!(c,std::path::Component::ParentDir)) {
         return Err("路径不在独立浏览资料内。".into());
     }
     let mut current = PathBuf::new();
     for component in path.components() {
         current.push(component);
         match fs::symlink_metadata(&current) {
-            Ok(meta) if meta.file_type().is_symlink() => {
+            Ok(meta) if crate::platform::is_link(&meta) => {
                 return Err("检测到链接，未修改资料。".into())
             }
             Err(e) if e.kind() != std::io::ErrorKind::NotFound => {
@@ -59,18 +60,10 @@ pub fn write_json(path: &Path, value: &impl Serialize) -> Result<(), String> {
     let root = path.parent().ok_or("配置目录无效。")?;
     check_path(root, path)?;
     fs::create_dir_all(root).map_err(|_| "无法创建浏览器目录。")?;
-    let temp = path.with_extension("pending");
-    check_path(root, &temp)?;
-    let data = serde_json::to_vec_pretty(value).map_err(|_| "配置编码失败。")?;
-    fs::write(&temp, data).map_err(|_| "配置写入失败。")?;
-    fs::set_permissions(&temp, fs::Permissions::from_mode(0o600))
-        .map_err(|_| "配置权限设置失败。")?;
-    if fs::rename(&temp, path).is_err() {
-        let _ = fs::remove_file(&temp);
-        return Err("配置保存失败。".into());
-    }
-    Ok(())
+    let data=serde_json::to_vec_pretty(value).map_err(|_|"配置编码失败。")?;
+    crate::platform::write(path,&data,0o600)
 }
+
 pub fn preferences(
     profile: &Path,
     config: &super::config::Config,
@@ -144,7 +137,7 @@ pub const SITE_DATA: &[&str] = &[
 ];
 fn size(path: &Path) -> Result<u64, String> {
     let meta = fs::symlink_metadata(path).map_err(|_| "无法读取缓存项目。")?;
-    if meta.file_type().is_symlink() {
+    if crate::platform::is_link(&meta) {
         return Err("缓存中包含链接，已停止。".into());
     }
     if meta.is_file() {

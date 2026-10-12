@@ -7,11 +7,15 @@ mod network;
 mod profile;
 #[cfg(target_os = "linux")]
 include!("linux.rs");
+#[cfg(windows)]
+include!("windows.rs");
 pub(crate) mod server;
 #[cfg(test)]
 mod tests;
 #[cfg(target_os = "linux")]
 use crate::linux::*;
+#[cfg(windows)]
+use crate::windows::*;
 use crate::{
     native::decode,
     progress::{Progress, Reporter},
@@ -125,24 +129,12 @@ fn write_launch_args(
     profile: &Path,
     version: &str,
 ) -> Result<(), String> {
-    use std::{io::Write, os::unix::fs::OpenOptionsExt};
     let mut args = config::arguments(config, machine, profile, "", version);
     args.pop();
     fs::create_dir_all(root).map_err(|_| "无法创建浏览器目录。")?;
-    let target = root.join("launch.args");
-    let temp = root.join("launch.args.tmp");
-    let mut file = fs::OpenOptions::new()
-        .create(true)
-        .write(true)
-        .truncate(true)
-        .mode(0o600)
-        .open(&temp)
-        .map_err(|_| "无法写入浏览器启动参数。")?;
-    file.write_all((args.join("\n") + "\n").as_bytes())
-        .map_err(|_| "无法写入浏览器启动参数。")?;
-    fs::rename(&temp, &target).map_err(|_| "无法写入浏览器启动参数。")?;
-    Ok(())
+    crate::platform::write(&root.join("launch.args"),(args.join("\n")+"\n").as_bytes(),0o600)
 }
+
 fn refresh_launch_args(app: &tauri::AppHandle) -> Result<(), String> {
     let root = root(app)?;
     let profile = root.join("profile");
@@ -166,7 +158,6 @@ fn open_session(
     machine: &Machine,
     engine_version: String,
 ) -> Result<String, String> {
-    use std::{io::Write, os::unix::fs::OpenOptionsExt};
     let state = app.state::<Browser>();
     let listener = server::bind()?;
     let port = listener
@@ -192,17 +183,7 @@ fn open_session(
     server::start(app.clone(), listener, token, web, context);
     let root = root(app)?;
     fs::create_dir_all(&root).map_err(|_| "无法创建浏览器目录。")?;
-    let temp = root.join("start.url.tmp");
-    let mut file = fs::OpenOptions::new()
-        .create(true)
-        .write(true)
-        .truncate(true)
-        .mode(0o600)
-        .open(&temp)
-        .map_err(|_| "无法写入起始页地址。")?;
-    file.write_all(format!("{page}\n").as_bytes())
-        .map_err(|_| "无法写入起始页地址。")?;
-    fs::rename(&temp, root.join("start.url")).map_err(|_| "无法写入起始页地址。")?;
+    crate::platform::write(&root.join("start.url"),format!("{page}\n").as_bytes(),0o600)?;
     Ok(page)
 }
 /// 资料或配置变化使旧会话失效后，立即换新会话，保证 start.url 始终指向存活的起始页服务。
@@ -435,7 +416,7 @@ fn snapshot(app: &tauri::AppHandle) -> Result<Snapshot, String> {
         region: crate::regions::matching(&config.language(&machine), &config.timezone(&machine)),
         config,
         machine,
-        engine_ready: !engine_version.is_empty(),
+        engine_ready: binary(&engine).is_file() && !engine_version.is_empty(),
         engine_version,
         running,
         profile: profile.to_string_lossy().into(),
@@ -693,7 +674,7 @@ pub async fn browser_align(
         }
         let fresh = config::machine()?;
         if fresh.location_enabled != Some(false)
-            || fresh.timezone != exit.timezone
+            || !crate::regions::same_zone(&fresh.timezone, &exit.timezone)
             || !fresh.locale.starts_with("en_US")
             || fresh.languages.first().map(String::as_str) != Some("en-US")
         {

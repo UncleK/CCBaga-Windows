@@ -146,5 +146,14 @@ mod tests {
 pub fn matching(language: &str, timezone: &str) -> Option<&'static Region> {
     REGIONS
         .iter()
-        .find(|r| r.language == language && r.timezone == timezone)
+        .find(|r| same_language(language,r.language) && same_zone(timezone,r.timezone))
+}
+
+pub fn same_zone(a:&str,b:&str)->bool{
+#[cfg(windows)]{crate::windows::system::same_zone(a,b)}
+#[cfg(not(windows))]{a==b}
+}
+pub fn same_language(a:&str,b:&str)->bool{
+#[cfg(windows)]{crate::windows::system::same_language(a,b)}
+#[cfg(not(windows))]{a==b||a.starts_with(&(b.to_string()+"-"))}
 }

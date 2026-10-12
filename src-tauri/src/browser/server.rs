@@ -17,9 +17,7 @@ fn answer(stream: &mut TcpStream, status: &str, kind: &str, body: &[u8]) {
 }
 pub fn nonce() -> Result<String, String> {
     let mut bytes = [0u8; 24];
-    std::fs::File::open("/dev/urandom")
-        .and_then(|mut f| f.read_exact(&mut bytes))
-        .map_err(|_| "无法创建本地会话令牌。")?;
+    getrandom::fill(&mut bytes).map_err(|_|"无法生成安全随机数。")?;
     Ok(bytes.iter().map(|x| format!("{x:02x}")).collect())
 }
 pub fn bind() -> Result<TcpListener, String> {

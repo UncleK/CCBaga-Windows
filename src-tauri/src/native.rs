@@ -7,6 +7,8 @@ use std::ffi::{c_char, CStr, CString};
 
 #[cfg(target_os = "linux")]
 use crate::linux::*;
+#[cfg(windows)]
+use crate::windows::*;
 #[cfg(target_os = "macos")]
 extern "C" {
     fn rf_permissions();
@@ -64,6 +66,8 @@ pub fn claude_pids() -> Result<Vec<i32>, String> {
     decode(unsafe { rf_claude_pids() })
 }
 pub fn permissions() -> Result<(), String> {
+    #[cfg(windows)]
+    { crate::windows::system::open_settings("location").map(|_| ()) }
     #[cfg(target_os = "linux")]
     {
         crate::linux::open_settings("location").map(|_| ())
@@ -79,7 +83,7 @@ pub fn permissions() -> Result<(), String> {
 pub fn copy(text: &str) -> Result<(), String> {
     let text = CString::new(text).map_err(|_| "文本包含无法复制的字符。")?;
     unsafe {
-        #[cfg(target_os = "linux")]
+        #[cfg(any(target_os = "linux", windows))]
         rf_copy(text.as_ptr())?;
         #[cfg(target_os = "macos")]
         rf_copy(text.as_ptr());
