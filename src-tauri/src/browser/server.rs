@@ -17,7 +17,7 @@ fn answer(stream: &mut TcpStream, status: &str, kind: &str, body: &[u8]) {
 }
 pub fn nonce() -> Result<String, String> {
     let mut bytes = [0u8; 24];
-    getrandom::fill(&mut bytes).map_err(|_|"无法生成安全随机数。")?;
+    getrandom::fill(&mut bytes).map_err(|_| "无法生成安全随机数。")?;
     Ok(bytes.iter().map(|x| format!("{x:02x}")).collect())
 }
 pub fn bind() -> Result<TcpListener, String> {
@@ -101,7 +101,10 @@ fn handle(
     let method = words.next().unwrap_or("");
     let url = words.next().unwrap_or("");
     let prefix = format!("/{token}/");
-    let Some(path)=url.strip_prefix(&prefix) else{answer(stream,"404 Not Found","text/plain",b"Not found");return;};
+    let Some(path) = url.strip_prefix(&prefix) else {
+        answer(stream, "404 Not Found", "text/plain", b"Not found");
+        return;
+    };
     if method == "GET" && path == "context" {
         let mut current = context.clone();
         current.ui_language = crate::ui_language::ui_language_read(app.clone());
@@ -136,7 +139,10 @@ fn handle(
             .find(|(k, _)| k.eq_ignore_ascii_case("content-length"))
             .and_then(|(_, v)| v.trim().parse::<usize>().ok())
             .filter(|n| *n > 0 && *n <= 16_384);
-        let Some(length)=length else{answer(stream,"400 Bad Request","text/plain",b"Invalid length");return;};
+        let Some(length) = length else {
+            answer(stream, "400 Bad Request", "text/plain", b"Invalid length");
+            return;
+        };
         let mut body = vec![0u8; length];
         if stream.read_exact(&mut body).is_err() {
             return;
@@ -144,7 +150,10 @@ fn handle(
         let report = serde_json::from_slice::<Report>(&body)
             .ok()
             .filter(Report::valid);
-        let Some(report)=report else{answer(stream,"400 Bad Request","text/plain",b"Invalid report");return;};
+        let Some(report) = report else {
+            answer(stream, "400 Bad Request", "text/plain", b"Invalid report");
+            return;
+        };
         let state = app.state::<Browser>();
         let mut session = state.session.lock().unwrap();
         if let Some(state) = session.as_mut().filter(|x| x.token == token) {
@@ -169,7 +178,10 @@ fn handle(
         );
         return;
     }
-    let Some(path)=resource(root,path) else{answer(stream,"404 Not Found","text/plain",b"Not found");return;};
+    let Some(path) = resource(root, path) else {
+        answer(stream, "404 Not Found", "text/plain", b"Not found");
+        return;
+    };
     let kind = match path.extension().and_then(|x| x.to_str()).unwrap_or("") {
         "html" => "text/html; charset=utf-8",
         "js" => "text/javascript",

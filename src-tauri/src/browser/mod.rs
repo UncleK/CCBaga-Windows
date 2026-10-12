@@ -132,7 +132,11 @@ fn write_launch_args(
     let mut args = config::arguments(config, machine, profile, "", version);
     args.pop();
     fs::create_dir_all(root).map_err(|_| "无法创建浏览器目录。")?;
-    crate::platform::write(&root.join("launch.args"),(args.join("\n")+"\n").as_bytes(),0o600)
+    crate::platform::write(
+        &root.join("launch.args"),
+        (args.join("\n") + "\n").as_bytes(),
+        0o600,
+    )
 }
 
 fn refresh_launch_args(app: &tauri::AppHandle) -> Result<(), String> {
@@ -183,7 +187,11 @@ fn open_session(
     server::start(app.clone(), listener, token, web, context);
     let root = root(app)?;
     fs::create_dir_all(&root).map_err(|_| "无法创建浏览器目录。")?;
-    crate::platform::write(&root.join("start.url"),format!("{page}\n").as_bytes(),0o600)?;
+    crate::platform::write(
+        &root.join("start.url"),
+        format!("{page}\n").as_bytes(),
+        0o600,
+    )?;
     Ok(page)
 }
 /// 资料或配置变化使旧会话失效后，立即换新会话，保证 start.url 始终指向存活的起始页服务。

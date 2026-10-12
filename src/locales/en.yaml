@@ -751,3 +751,10 @@
 "协议": "Protocol"
 "端口": "Port"
 "以面板为准": "As shown in the dashboard"
+
+# Windows platform actions
+"此平台请通过本仓库安装包或源码更新，当前自动更新源仅提供 macOS。": "Update this platform using an installer or source from this repository. The automatic update feed only supports macOS."
+"已打开 Windows 默认应用设置；本版本尚未注册为默认浏览器。": "Windows Default apps settings are open. This version is not registered as a default browser."
+"打开默认应用设置": "Open Default apps settings"
+"打开凭据管理器": "Open Credential Manager"
+"请在 Windows 设置中手动关闭定位服务，返回后刷新核验。": "Turn off Location services manually in Windows Settings, then return and refresh to verify."

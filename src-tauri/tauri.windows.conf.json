@@ -1,0 +1,38 @@
+{
+  "productName": "CCBaga Windows",
+  "identifier": "ai.local.ccbaga.windows",
+  "version": "0.3.0",
+  "build": {
+    "beforeBuildCommand": "bun run build"
+  },
+  "bundle": {
+    "targets": [
+      "nsis"
+    ],
+    "icon": [
+      "icons/icon.ico"
+    ],
+    "createUpdaterArtifacts": false,
+    "resources": {
+      "../browser-runtime/windows/": "browser-runtime/windows/"
+    },
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      },
+      "nsis": {
+        "installMode": "currentUser",
+        "languages": [
+          "SimpChinese",
+          "English"
+        ],
+        "displayLanguageSelector": true
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "endpoints": []
+    }
+  }
+}

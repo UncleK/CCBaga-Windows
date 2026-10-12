@@ -52,7 +52,6 @@ fn proxy_and_real_hardware() {
         .iter()
         .any(|x| x.contains("load-extension") || x.contains("disable-web-security")));
 }
-#[cfg(unix)]
 #[test]
 fn cache_isolation_and_direct_delete() {
     let root = sample();

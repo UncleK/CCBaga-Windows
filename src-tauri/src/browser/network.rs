@@ -191,9 +191,9 @@ pub fn checks(
             report
                 .zip(report.and_then(|r| r.exit.as_ref()))
                 .map(|(r, e)| {
-                    r.timezone == config.timezone(machine)
-                        && r.timezone == machine.timezone
-                        && r.timezone == e.timezone
+                    crate::regions::same_zone(&r.timezone, &config.timezone(machine))
+                        && crate::regions::same_zone(&r.timezone, &machine.timezone)
+                        && crate::regions::same_zone(&r.timezone, &e.timezone)
                 }),
             format!(
                 "本机：{}；浏览器：{}；出口：{}",
@@ -212,9 +212,7 @@ pub fn checks(
                     && machine
                         .languages
                         .first()
-                        .map(|x| {
-                            x == target.language || x.starts_with(&format!("{}-", target.language))
-                        })
+                        .map(|x| crate::regions::same_language(x, target.language))
                         .unwrap_or(false)
                     && machine.locale.starts_with(target.locale)
             }),
@@ -230,10 +228,10 @@ pub fn checks(
             report.map(|r| {
                 r.platform
                     .to_lowercase()
-                    .contains(if machine.platform == "linux" {
-                        "linux"
-                    } else {
-                        "mac"
+                    .contains(match machine.platform.as_str() {
+                        "linux" => "linux",
+                        "windows" => "win",
+                        _ => "mac",
                     })
                     && r.cores == machine.cores
                     && (machine.platform == "linux" || r.platform_version == machine.version)

@@ -67,7 +67,9 @@ pub fn claude_pids() -> Result<Vec<i32>, String> {
 }
 pub fn permissions() -> Result<(), String> {
     #[cfg(windows)]
-    { crate::windows::system::open_settings("location").map(|_| ()) }
+    {
+        crate::windows::system::open_settings("location").map(|_| ())
+    }
     #[cfg(target_os = "linux")]
     {
         crate::linux::open_settings("location").map(|_| ())

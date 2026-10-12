@@ -16,7 +16,7 @@ pub(super) fn validate(path: &Path) -> Result<PathBuf, String> {
     {
         return Err("仅支持当前用户的真实文件夹；不接受文件、链接或其他用户目录。".into());
     }
-    fs::canonicalize(path).map_err(|_|"无法读取文件夹。".into())
+    fs::canonicalize(path).map_err(|_| "无法读取文件夹。".into())
 }
 pub(super) fn collect(root: &Path, reporter: &Reporter) -> Result<Scan, String> {
     let root = validate(root)?;

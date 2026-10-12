@@ -31,8 +31,8 @@ export function AppUpdate({blocked,onBusy}:{blocked:boolean;onBusy:(busy:boolean
     if(running.current||installed.current)return;
     running.current=true;setPhase('checking');setError('');
     try{
-      if(await invoke<string>('runtime_platform') === 'linux'){
-        if(live.current){setPhase('idle');if(show)setError(t('Linux 版本请通过安装包或源码更新，当前更新源仅提供 macOS。'));}
+      if(await invoke<string>('runtime_platform') !== 'macos'){
+        if(live.current){setPhase('idle');if(show)setError(t('此平台请通过本仓库安装包或源码更新，当前自动更新源仅提供 macOS。'));}
         return;
       }
       const next=await check({timeout:20000});

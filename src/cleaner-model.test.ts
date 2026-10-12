@@ -36,3 +36,15 @@ test('结束进程后的新快照按原路径恢复选择，不扩大到新项�
  const next=[item('new-cache','/home/Claude/Cache','safe'),item('new-desktop','/home/Claude','login'),item('new-data','/home/extra','login')];
  expect(reselectIds(samples,['cache'],next)).toEqual(['new-cache']);
 });
+
+test('Windows paths handle separators, case and verbatim prefixes with directory boundaries',()=>{
+ const paths=[item('parent','C:\\Users\\用户\\Claude','login'),item('child','\\\\?\\C:\\Users\\用户\\Claude\\Cache','safe'),item('neighbor','c:/users/用户/ClaudeBackup','safe')];
+ expect(effectiveItems(paths,['parent','child','neighbor']).map(x=>x.id)).toEqual(['parent','neighbor']);
+ expect(deselectItems(paths,['parent','child','neighbor'],['child'])).toEqual(['neighbor']);
+ expect(reselectIds(paths,['child'],[item('new','c:/users/用户/claude/cache','safe'),item('other','c:/users/用户/claude/cache2','safe')])).toEqual(['new']);
+});
+test('Unix paths remain case sensitive',()=>{
+ const paths=[item('upper','/home/Claude','login'),item('lower','/home/claude/cache','safe')];
+ expect(effectiveItems(paths,['upper','lower']).map(x=>x.id)).toEqual(['upper','lower']);
+ expect(reselectIds(paths,['upper'],[item('other','/home/claude','login')])).toEqual([]);
+});

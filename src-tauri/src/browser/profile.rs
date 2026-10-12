@@ -4,9 +4,9 @@
 // [PROTOCOL]: 变更时更新此头部，然后检查 CLAUDE.md
 #[cfg(target_os = "linux")]
 use crate::linux::*;
+use crate::native::decode;
 #[cfg(windows)]
 use crate::windows::*;
-use crate::native::decode;
 use serde::Serialize;
 use serde_json::{json, Value};
 #[cfg(target_os = "macos")]
@@ -38,7 +38,12 @@ pub fn quit(profile: &Path) -> Result<(), String> {
     Err("浏览器仍在运行，请保存任务并关闭浏览器窗口。".into())
 }
 pub fn check_path(root: &Path, path: &Path) -> Result<(), String> {
-    if !path.is_absolute() || !path.starts_with(root) || path.components().any(|c|matches!(c,std::path::Component::ParentDir)) {
+    if !path.is_absolute()
+        || !path.starts_with(root)
+        || path
+            .components()
+            .any(|c| matches!(c, std::path::Component::ParentDir))
+    {
         return Err("路径不在独立浏览资料内。".into());
     }
     let mut current = PathBuf::new();
@@ -60,8 +65,8 @@ pub fn write_json(path: &Path, value: &impl Serialize) -> Result<(), String> {
     let root = path.parent().ok_or("配置目录无效。")?;
     check_path(root, path)?;
     fs::create_dir_all(root).map_err(|_| "无法创建浏览器目录。")?;
-    let data=serde_json::to_vec_pretty(value).map_err(|_|"配置编码失败。")?;
-    crate::platform::write(path,&data,0o600)
+    let data = serde_json::to_vec_pretty(value).map_err(|_| "配置编码失败。")?;
+    crate::platform::write(path, &data, 0o600)
 }
 
 pub fn preferences(

@@ -64,7 +64,7 @@ pub struct Item {
 #[derive(Clone, PartialEq)]
 struct Stamp(Vec<u64>);
 fn stamp(path: &Path, meta: &fs::Metadata) -> Result<Stamp, String> {
-    crate::platform::fingerprint(path,meta).map(Stamp)
+    crate::platform::fingerprint(path, meta).map(Stamp)
 }
 fn generation() -> u128 {
     std::time::SystemTime::now()
@@ -106,7 +106,9 @@ impl Cleaner {
         self.active.store(false, Ordering::SeqCst);
     }
 }
-fn home() -> Result<PathBuf, String> { crate::platform::home() }
+fn home() -> Result<PathBuf, String> {
+    crate::platform::home()
+}
 fn add_target(scan: &mut Scan, target: targets::Target, batch: u128) {
     let path = target.path;
     let meta = match fs::symlink_metadata(&path) {
@@ -160,7 +162,13 @@ fn add_target(scan: &mut Scan, target: targets::Target, batch: u128) {
             }
         }
     }
-    let item_stamp = match stamp(&path,&meta) { Ok(value)=>value, Err(error)=>{scan.warnings.push(error);return;} };
+    let item_stamp = match stamp(&path, &meta) {
+        Ok(value) => value,
+        Err(error) => {
+            scan.warnings.push(error);
+            return;
+        }
+    };
     let (bytes, files, exact, tree_stamp) = targets::measure(&path);
     scan.items.push(Item {
         id: format!("{batch}-{}", scan.items.len()),
@@ -302,7 +310,10 @@ fn diagnostics(scan: &mut Scan) {
         })
         .unwrap_or("未知".into());
     #[cfg(windows)]
-    let timezone = crate::windows::system::public_read().ok().and_then(|v|v["timezone"].as_str().map(str::to_string)).unwrap_or_else(||"未知".into());
+    let timezone = crate::windows::system::public_read()
+        .ok()
+        .and_then(|v| v["timezone"].as_str().map(str::to_string))
+        .unwrap_or_else(|| "未知".into());
     scan.diagnostics.push(Diagnostic {
         title: "设备时区".into(),
         detail: format!("{timezone} · 可在电脑设置中修改。"),
@@ -413,11 +424,19 @@ fn processes() -> Result<Vec<ClaudeProcess>, String> {
         .collect())
 }
 #[cfg(windows)]
-fn processes() -> Result<Vec<ClaudeProcess>,String> {
-    Ok(crate::windows::process::list()?.into_iter().filter_map(|p| {
-        let name=crate::windows::process::claude_kind(&p)?;
-        Some(ClaudeProcess{pid:p.pid,name:name.into(),executable:p.executable,started:p.started})
-    }).collect())
+fn processes() -> Result<Vec<ClaudeProcess>, String> {
+    Ok(crate::windows::process::list()?
+        .into_iter()
+        .filter_map(|p| {
+            let name = crate::windows::process::claude_kind(&p)?;
+            Some(ClaudeProcess {
+                pid: p.pid,
+                name: name.into(),
+                executable: p.executable,
+                started: p.started,
+            })
+        })
+        .collect())
 }
 fn running() -> Result<bool, String> {
     Ok(!processes()?.is_empty())
@@ -454,8 +473,16 @@ fn signal_same_process(target: &ClaudeProcess, signal: i32) -> Result<(), String
 }
 
 #[cfg(windows)]
-fn signal_same_process(target:&ClaudeProcess,_signal:i32)->Result<(),String>{
-    crate::windows::process::stop(&crate::windows::process::Process{pid:target.pid,executable:target.executable.clone(),started:target.started.clone(),command_line:String::new()},true)
+fn signal_same_process(target: &ClaudeProcess, _signal: i32) -> Result<(), String> {
+    crate::windows::process::stop(
+        &crate::windows::process::Process {
+            pid: target.pid,
+            executable: target.executable.clone(),
+            started: target.started.clone(),
+            command_line: String::new(),
+        },
+        true,
+    )
 }
 
 fn current_scan(root: &Path, org: Option<&str>) -> Result<Scan, String> {
@@ -698,6 +725,6 @@ pub async fn cleaner_clean(
     result
 }
 
-#[cfg(all(test,windows))]
-#[path="windows/cleaner_tests.rs"]
+#[cfg(all(test, windows))]
+#[path = "windows/cleaner_tests.rs"]
 mod windows_tests;

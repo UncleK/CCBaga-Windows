@@ -277,16 +277,55 @@ pub(super) fn definitions(root: &Path) -> Vec<Target> {
     }
     #[cfg(windows)]
     {
-        result.retain(|item|!item.path.starts_with(root.join("Library"))&&!matches!(item.operation,Operation::Edit(config::EditKind::Shell)));
-        let desktop = if super::home().ok().as_deref()==Some(root) {
-            std::env::var_os("APPDATA").and_then(|p|fs::canonicalize(p).ok()).filter(|p|p.starts_with(root)).map(|p|p.join("Claude"))
-        } else {Some(root.join("AppData/Roaming/Claude"))};
-        if let Some(desktop)=desktop {
-            for relative in ["Cache","Code Cache","GPUCache","DawnCache","logs","Service Worker/CacheStorage","Service Worker/ScriptCache"] {
-                result.push(target(&desktop,relative,"Claude Desktop 缓存","cache","safe","仅移除可重新生成的缓存。"));
+        result.retain(|item| {
+            !item.path.starts_with(root.join("Library"))
+                && !matches!(item.operation, Operation::Edit(config::EditKind::Shell))
+        });
+        let desktop = if super::home().ok().as_deref() == Some(root) {
+            std::env::var_os("APPDATA")
+                .and_then(|p| fs::canonicalize(p).ok())
+                .filter(|p| p.starts_with(root))
+                .map(|p| p.join("Claude"))
+        } else {
+            Some(root.join("AppData/Roaming/Claude"))
+        };
+        if let Some(desktop) = desktop {
+            for relative in [
+                "Cache",
+                "Code Cache",
+                "GPUCache",
+                "DawnCache",
+                "logs",
+                "Service Worker/CacheStorage",
+                "Service Worker/ScriptCache",
+            ] {
+                result.push(target(
+                    &desktop,
+                    relative,
+                    "Claude Desktop 缓存",
+                    "cache",
+                    "safe",
+                    "仅移除可重新生成的缓存。",
+                ));
             }
-            for relative in ["Network/Cookies","Network/Cookies-journal","Cookies","Cookies-journal","Local Storage","Session Storage","IndexedDB","WebStorage"] {
-                result.push(target(&desktop,relative,"Claude Desktop 登录存储","account","login","删除后需要重新登录；保留 MCP 配置和扩展。"));
+            for relative in [
+                "Network/Cookies",
+                "Network/Cookies-journal",
+                "Cookies",
+                "Cookies-journal",
+                "Local Storage",
+                "Session Storage",
+                "IndexedDB",
+                "WebStorage",
+            ] {
+                result.push(target(
+                    &desktop,
+                    relative,
+                    "Claude Desktop 登录存储",
+                    "account",
+                    "login",
+                    "删除后需要重新登录；保留 MCP 配置和扩展。",
+                ));
             }
         }
     }
@@ -326,7 +365,9 @@ pub(super) fn measure(path: &Path) -> (u64, usize, bool, Vec<u8>) {
         };
         hash.update(path.as_os_str().as_encoded_bytes());
         hash.update([0]);
-        let Ok(fields)=crate::platform::fingerprint(&path,&meta) else { return (bytes,files,false,hash.finalize().to_vec()); };
+        let Ok(fields) = crate::platform::fingerprint(&path, &meta) else {
+            return (bytes, files, false, hash.finalize().to_vec());
+        };
         for field in fields {
             hash.update(field.to_le_bytes());
         }
@@ -389,7 +430,7 @@ pub(super) fn org_files(root: &Path, org: &str) -> Result<(Vec<PathBuf>, bool), 
             complete = false;
             continue;
         };
-        if !crate::platform::owned(&path,&meta) || crate::platform::is_link(&meta) {
+        if !crate::platform::owned(&path, &meta) || crate::platform::is_link(&meta) {
             continue;
         }
         if meta.is_dir() {

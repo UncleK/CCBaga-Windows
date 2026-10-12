@@ -14,24 +14,29 @@ export const groups = [
   {id:'config',label:'代理与认证配置'}, {id:'backups',label:'既有备份'}, {id:'organization',label:'旧组织文件'},
 ];
 export const riskLabels:Record<string,string> = {safe:'可再生成',login:'需重新登录',history:'包含历史',config:'修改配置',backup:'永久删除'};
+function pathKey(path:string):string {
+  if (!/^(?:[a-z]:[\\/]|\\\\)/i.test(path)) return path.replace(/\/$/,'');
+  return path.replace(/^\\\\\?\\UNC\\/i,'\\\\').replace(/^\\\\\?\\/,'').replaceAll('\\','/').replace(/\/$/,'').toLowerCase();
+}
+const inside=(child:string,parent:string)=>pathKey(child).startsWith(pathKey(parent)+'/');
 export function presetIds(items:Item[], preset:Preset):string[] {
   return items.filter(i=>preset==='full'||i.risk==='safe'||(preset==='reset'&&i.risk==='login')).map(i=>i.id);
 }
 export function effectiveItems(items:Item[], ids:string[]):Item[] {
   const selected=items.filter(i=>ids.includes(i.id));
-  return selected.filter(i=>!selected.some(p=>p.id!==i.id&&i.path.startsWith(p.path+'/')));
+  return selected.filter(i=>!selected.some(p=>p.id!==i.id&&inside(i.path,p.path)));
 }
 export function deselectItems(items:Item[], ids:string[], removed:string[]):string[] {
   const paths=items.filter(i=>removed.includes(i.id)).map(i=>i.path);
   return ids.filter(id=>!removed.includes(id)&&!paths.some(path=>{
     const parent=items.find(i=>i.id===id);
-    return !!parent&&path.startsWith(parent.path+'/');
+    return !!parent&&inside(path,parent.path);
   }));
 }
 // ----- 扫描编号变化后按原路径恢复选择，避免静默扩大删除范围 -----
 export function reselectIds(items:Item[], ids:string[], next:Item[]):string[] {
-  const paths=new Set(items.filter(i=>ids.includes(i.id)).map(i=>i.path));
-  return next.filter(i=>paths.has(i.path)).map(i=>i.id);
+  const paths=new Set(items.filter(i=>ids.includes(i.id)).map(i=>pathKey(i.path)));
+  return next.filter(i=>paths.has(pathKey(i.path))).map(i=>i.id);
 }
 export function formatBytes(bytes:number):string {
   if(!bytes)return '0 B';

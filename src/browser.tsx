@@ -36,6 +36,10 @@ export function BrowserPanel({ onBusy }: {
     async function makeDefault() { setAsking(true); setDefaultNote(''); try {
         const next = await invoke<DefaultBrowser>('browser_set_default');
         setPreferred(next);
+        if (state?.machine.platform === 'windows') {
+            setDefaultNote('已打开 Windows 默认应用设置；本版本尚未注册为默认浏览器。');
+            return;
+        }
         setDefaultNote(next.is_default ? "CCBaga-B已是默认浏览器。" : "已向系统请求设为默认浏览器，请检查系统确认。");
         for (let i = 0; i < 20 && live.current; i++) {
             await new Promise(r => setTimeout(r, 1500));
@@ -88,7 +92,7 @@ export function BrowserPanel({ onBusy }: {
     const cache = state?.cache.filter(x => !x.login) || [];
     function edit<K extends keyof BrowserConfig>(key: K, value: BrowserConfig[K]) { setDraft(old => old ? { ...old, [key]: value } : old); }
     return <section className="system-page browser-page"><div className="cleanup-title"><div><h1>{t("浏览器环境")}</h1></div><Button size="small" variant="secondary" disabled={!!busy} onClick={() => void act('browser_read')}>{t("刷新状态")}</Button></div>
-    <div className="browser-default"><strong>{state?.running ? t("运行中") : t("未运行")}</strong><Button variant="secondary" size="small" disabled={asking || !preferred?.installed || preferred?.is_default} loading={asking} onClick={() => void makeDefault()}>{preferred?.is_default ? t("已是默认浏览器") : t("设为默认浏览器")}</Button></div>
+    <div className="browser-default"><strong>{state?.running ? t("运行中") : t("未运行")}</strong><Button variant="secondary" size="small" disabled={asking || !preferred?.installed || preferred?.is_default} loading={asking} onClick={() => void makeDefault()}>{state?.machine.platform === "windows" ? t("打开默认应用设置") : preferred?.is_default ? t("已是默认浏览器") : t("设为默认浏览器")}</Button></div>
     {defaultNote && <p className="system-feedback" role="status">{t(defaultNote)}</p>}
     {error && <p role="alert" className="system-feedback error">{t(error)}</p>}
     <div className="browser-actions"><Button variant="ink" disabled={disabled || !state?.engine_ready || !!changed} loading={busy === 'browser_launch'} onClick={() => void act('browser_launch')}>{state?.running ? t("重新打开实测页") : t("打开浏览器并实测")}</Button><Button variant="secondary" disabled={disabled || !state?.running} loading={busy === 'browser_quit'} onClick={() => void act('browser_quit')}>{t("正常退出浏览器")}</Button><Button variant="secondary" disabled={disabled} loading={busy === 'browser_check'} onClick={() => void act('browser_check')}>{t("检测机器出口")}</Button><Button variant="ghost" disabled={disabled || state?.running || !!changed} onClick={() => setConfirm('align')}>{t("对齐美国系统环境")}</Button></div>

@@ -9,7 +9,11 @@
     "tauri": "tauri",
     "test": "bun test",
     "install:apps": "sh scripts/install-apps.sh",
-    "dev:install": "python3 scripts/dev-install.py"
+    "dev:install": "python3 scripts/dev-install.py",
+    "windows:check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows.ps1 -Action Check",
+    "windows:dev": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows.ps1 -Action Dev",
+    "windows:build": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows.ps1 -Action Build",
+    "windows:test": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/windows.ps1 -Action Test"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.0.0",

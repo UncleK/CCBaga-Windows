@@ -8,20 +8,20 @@ compile_error!("发布构建需要 custom-protocol；使用 tauri build 或 carg
 mod browser;
 #[cfg_attr(windows, path = "windows/claude_cli.rs")]
 mod claude_cli;
-mod platform;
-#[cfg(windows)]
-mod windows;
 mod cleaner;
 #[cfg(target_os = "linux")]
 mod linux;
 mod native;
+mod network_links;
+mod platform;
 mod progress;
 mod regions;
 mod system;
 mod ui_language;
-#[cfg(test)]
+#[cfg(all(test, not(windows)))]
 mod updater_tests;
-mod network_links;
+#[cfg(windows)]
+mod windows;
 use tauri::{tray::TrayIconBuilder, Manager};
 fn show(app: &tauri::AppHandle) {
     if let Some(window) = app.get_webview_window("main") {
